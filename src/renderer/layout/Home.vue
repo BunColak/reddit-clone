@@ -9,7 +9,9 @@
 <script>
 import PostList from '@/components/PostList';
 import { mapState } from 'vuex';
-import { refreshToken } from '@/utils/token';
+import { refreshToken, accessToken } from '@/utils/token';
+const { BrowserWindow } = require('electron').remote; // eslint-disable-line
+
 export default {
   name: 'home-page',
   components: {
@@ -27,25 +29,69 @@ export default {
     };
   },
   created() {
-    this.getRedditFrontpage();
+    this.$db.findOne({ type: 'refresh_token' }, (error, doc) => {
+      if (doc) {
+        this.getRedditFrontpage();
+      } else {
+        this.loginToReddit();
+      }
+    });
   },
   methods: {
     getRedditFrontpage() {
       this.$http
         .get('http://oauth.reddit.com/best.json?limit=50', {
           headers: {
-            authorization: 'Bearer ' + this.access_token
+            authorization: this.access_token ? 'Bearer ' + this.access_token : ''
           }
         })
         .then(request => {
+          console.log(request);
+
           this.posts = request.data.data.children;
         })
         .catch(() => {
-          refreshToken().then(access_token => {
+          refreshToken(this.refreshToken).then(access_token => {
             this.$store.dispatch('user/changeAccessToken', access_token);
             this.getRedditFrontpage();
           });
         });
+    },
+    loginToReddit() {
+      let authWindow = new BrowserWindow({
+        width: 1280,
+        height: 720,
+        show: false,
+        'node-integration': false,
+        'web-security': false
+      });
+
+      const authUrl =
+        'https://www.reddit.com/api/v1/authorize?client_id=JKyBiYvIX1CjWQ&response_type=code&state=qazwsx&redirect_uri=http://localhost/reddit_auth&duration=permanent&scope=identity,edit,flair,history,modconfig,modflair,modlog,modposts,modwiki,mysubreddits,privatemessages,read,report,save,submit,subscribe,vote,wikiedit,wikiread';
+
+      authWindow.loadURL(authUrl);
+      authWindow.show();
+
+      const vue = this;
+
+      authWindow.webContents.on('will-navigate', function(event, newUrl) {
+        const url = new URL(newUrl);
+
+        const code = url.searchParams.get('code');
+        accessToken(code).then(function(codes) {
+          vue.$store.dispatch('user/changeAccessToken', codes.access_token);
+          vue.$store.dispatch('user/changeRefreshToken', codes.refresh_token);
+
+          vue.$db.insert({ type: 'access_token', access_token: codes.access_token });
+          vue.$db.insert({ type: 'refresh_token', refresh_token: codes.refresh_token });
+          authWindow.destroy();
+        });
+      });
+
+      authWindow.on('closed', function() {
+        authWindow = null;
+        vue.getRedditFrontpage();
+      });
     }
   }
 };

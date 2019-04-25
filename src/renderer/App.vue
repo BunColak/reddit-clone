@@ -6,11 +6,23 @@
 </template>
 
 <script>
-import Navigation from '@/components/Navigation'
+import Navigation from '@/components/Navigation';
 export default {
   name: 'reddit-bcolak',
   components: {
     Navigation
+  },
+  created() {
+    this.$db.findOne({ type: 'access_token' }, (error, doc) => {
+      if (doc) {
+        this.$store.dispatch('user/changeAccessToken', doc.access_token);
+      }
+      this.$db.findOne({ type: 'refresh_token' }, (error, doc) => {
+        if (doc) {
+          this.$store.dispatch('user/changeRefreshToken', doc.refresh_token);
+        }
+      });
+    });
   }
 };
 </script>
@@ -23,11 +35,11 @@ export default {
 @import url('./assets/fonts/fonts.css');
 
 body {
-    background: #f2f3f5;
-    font-family: 'Source Sans Pro', sans-serif;
+  background: #f2f3f5;
+  font-family: 'Source Sans Pro', sans-serif;
 
-    a {
-      text-decoration: none;
-    }
+  a {
+    text-decoration: none;
+  }
 }
 </style>

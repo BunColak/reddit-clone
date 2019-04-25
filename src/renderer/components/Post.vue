@@ -1,29 +1,30 @@
 <template>
-<li>
-  <div class="ups">
-    <i class="material-icons">
-      keyboard_arrow_up
-    </i>
-    <span>{{ ups }}</span>
-    <i class="material-icons">
-      keyboard_arrow_down
-    </i>
-  </div>
-  <div class="info">
-    <div class="title">
-      <router-link :to="postLink">
-        {{ post.data.title }}
-      </router-link>
-      <span class="subreddit">
-        {{ post.data.subreddit_name_prefixed }}
-      </span>
+  <li>
+    <div class="ups">
+      <i class="material-icons">
+        keyboard_arrow_up
+      </i>
+      <span>{{ ups }}</span>
+      <i class="material-icons">
+        keyboard_arrow_down
+      </i>
     </div>
-    <div class="actions">
-      <router-link :to="postLink" class="material-icons">forum</router-link>
-      <span>by {{ post.data.author }}</span>
+    <div class="info">
+      <div class="title">
+        <router-link v-if="post.data.is_self" :to="postLink">
+          {{ post.data.title }}
+        </router-link>
+        <a :href="post.data.url" target="_blank" v-else>{{ post.data.title }}</a>
+        <span class="subreddit">
+          {{ post.data.subreddit_name_prefixed }}
+        </span>
+      </div>
+      <div class="actions">
+        <router-link :to="postLink" class="material-icons">forum</router-link>
+        <span>by {{ post.data.author }}</span>
+      </div>
     </div>
-  </div>
-</li>
+  </li>
 </template>
 
 <script>
