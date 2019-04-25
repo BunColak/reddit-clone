@@ -1,16 +1,21 @@
 <template>
   <div id="app">
+    <navigation />
     <router-view></router-view>
   </div>
 </template>
 
 <script>
+import Navigation from '@/components/Navigation'
 export default {
   name: 'reddit-bcolak',
+  components: {
+    Navigation
+  }
 };
 </script>
 
-<style>
+<style lang="scss">
 /* CSS */
 @import url('/node_modules/normalize.css/normalize.css');
 @import url('/node_modules/bootstrap/dist/css/bootstrap-grid.min.css');
@@ -20,5 +25,9 @@ export default {
 body {
     background: #f2f3f5;
     font-family: 'Source Sans Pro', sans-serif;
+
+    a {
+      text-decoration: none;
+    }
 }
 </style>
