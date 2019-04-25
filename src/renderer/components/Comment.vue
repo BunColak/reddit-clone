@@ -1,7 +1,7 @@
 <template>
   <div class="comment">
     <p class="author">{{ comment.data.author }}</p>
-    <div>{{ comment.data.body }}</div>
+    <div v-html="commentBody"></div>
     <div class="replies" v-if="replies">
       <comment v-for="reply in replies" :key="reply.id" :comment="reply"></comment>
     </div>
@@ -9,6 +9,7 @@
 </template>
 
 <script>
+import { decodeHTML } from '@/utils/string';
 export default {
   name: 'comment',
   props: {
@@ -17,12 +18,18 @@ export default {
   computed: {
     replies() {
       let replies = [];
-      if(this.comment.data.replies) {
+      if (this.comment.data.replies) {
         this.comment.data.replies.data.children.forEach(reply => {
-          reply.kind !== "more" && replies.push(reply);
+          reply.kind !== 'more' && replies.push(reply);
         });
       }
       return replies;
+    },
+    commentBody() {
+      if (this.comment.data.body_html) {
+        return decodeHTML(this.comment.data.body_html);
+      }
+      return '';
     }
   }
 };
@@ -30,7 +37,7 @@ export default {
 
 <style lang="scss">
 .comment {
-  padding: 8px;
+  padding: 8px 16px;
   background: white;
   margin: 4px 0;
   border-left: inset 1px lighten($color: #000000, $amount: 60);
