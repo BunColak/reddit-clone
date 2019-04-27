@@ -14,20 +14,27 @@
         <router-link v-if="post.data.is_self" :to="postLink">
           {{ post.data.title }}
         </router-link>
-        <a :href="post.data.url" target="_blank" v-else>{{ post.data.title }}</a>
-        <span class="subreddit">
-          {{ post.data.subreddit_name_prefixed }}
-        </span>
+        <a :href="post.data.url" target="_blank" v-else
+          >{{ post.data.title }}
+          <span class="domain" v-if="!post.data.is_self"
+            >{{ post.data.domain }}<i class="material-icons">open_in_new</i>
+          </span>
+        </a>
       </div>
       <div class="actions">
-        <router-link :to="postLink" class="material-icons">forum</router-link>
-        <span>by {{ post.data.author }}</span>
+        <router-link :to="postLink" class="material-icons discussion">forum</router-link>
+        <span>by <strong>{{ post.data.author }}</strong> {{ relativePostTime }} ago to </span>
+        <router-link :to="subredditLink" class="subreddit">
+          {{ post.data.subreddit_name_prefixed }}
+        </router-link>
       </div>
     </div>
   </li>
 </template>
 
+
 <script>
+import { distanceInWordsToNow } from 'date-fns'
 export default {
   name: 'post',
   props: {
@@ -42,6 +49,12 @@ export default {
     },
     postLink() {
       return `/post/${this.post.data.id}`;
+    },
+    relativePostTime() {
+      return distanceInWordsToNow(this.post.data.created*1000)
+    },
+    subredditLink() {
+      return `/subreddit/${this.post.data.subreddit}`;
     }
   }
 };
@@ -89,17 +102,38 @@ li {
         &:hover {
           color: black;
         }
-      }
 
-      .subreddit {
-        color: lighten($color: black, $amount: 40);
+        .domain {
+          display: inline-block;
+          background: lighten($color: black, $amount: 85);
+          color: lighten($color: black, $amount: 30);
+          padding: 2px 4px;
+          border-radius: 5px;
+          font-size: 14px;
+          font-weight: 400;
+
+          &:hover {
+            cursor: pointer;
+          }
+
+          i {
+            display: inline-block;
+            position: relative;
+            font-size: 16px;
+            vertical-align: bottom;
+          }
+        }
       }
     }
 
     .actions {
       margin-top: 5px;
 
-      a {
+      .subreddit {
+        color: lighten($color: black, $amount: 40);
+      }
+
+      .discussion {
         color: lighten($color: black, $amount: 40);
         vertical-align: middle;
         text-decoration: none;

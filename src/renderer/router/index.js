@@ -15,5 +15,10 @@ export default new Router({
       name: 'post-page',
       component: require('@/layout/Post').default,
     },
+    {
+      path: '/subreddit/:subreddit',
+      name: 'subreddit-page',
+      component: require('@/layout/Subreddit').default,
+    },
   ],
 });

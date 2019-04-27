@@ -46,8 +46,6 @@ export default {
           }
         })
         .then(request => {
-          console.log(request);
-
           this.posts = request.data.data.children;
         })
         .catch(() => {
