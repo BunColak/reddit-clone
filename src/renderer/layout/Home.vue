@@ -51,8 +51,10 @@ export default {
           this.posts = request.data.data.children;
         })
         .catch(() => {
-          refreshToken(this.refreshToken).then(access_token => {
+          refreshToken(this.refresh_token).then(access_token => {
             this.$store.dispatch('user/changeAccessToken', access_token);
+            this.$db.remove({ type: 'access_token' });
+            this.$db.insert({ type: 'access_token', access_token });
             this.getRedditFrontpage();
           });
         });
@@ -77,15 +79,17 @@ export default {
       authWindow.webContents.on('will-navigate', function(event, newUrl) {
         const url = new URL(newUrl);
 
-        const code = url.searchParams.get('code');
-        accessToken(code).then(function(codes) {
-          vue.$store.dispatch('user/changeAccessToken', codes.access_token);
-          vue.$store.dispatch('user/changeRefreshToken', codes.refresh_token);
+        if (url.hostname === 'localhost') {
+          const code = url.searchParams.get('code');
+          accessToken(code).then(function(codes) {
+            vue.$store.dispatch('user/changeAccessToken', codes.access_token);
+            vue.$store.dispatch('user/changeRefreshToken', codes.refresh_token);
 
-          vue.$db.insert({ type: 'access_token', access_token: codes.access_token });
-          vue.$db.insert({ type: 'refresh_token', refresh_token: codes.refresh_token });
-          authWindow.destroy();
-        });
+            vue.$db.insert({ type: 'access_token', access_token: codes.access_token });
+            vue.$db.insert({ type: 'refresh_token', refresh_token: codes.refresh_token });
+            authWindow.destroy();
+          });
+        }
       });
 
       authWindow.on('closed', function() {

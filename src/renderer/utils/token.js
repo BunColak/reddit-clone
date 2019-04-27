@@ -15,7 +15,7 @@ export function refreshToken(refresh_token) {
         const access_token = request.data.access_token;
         resolve(access_token);
       })
-      .catch(error => {
+      .catch(error => {        
         reject(error);
       });
   });
