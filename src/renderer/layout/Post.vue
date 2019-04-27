@@ -34,6 +34,11 @@ export default {
         })
         .then((data) => {
           this.post = data.data;
+        })
+        .catch(() => {
+          this.$store.dispatch('user/refreshAccessToken').then(() => {
+            this.getPostDetails();
+          });
         });
     },
   },

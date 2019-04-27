@@ -1,3 +1,6 @@
+import { refreshToken } from '@/utils/token';
+import db from '@/datastore';
+
 const state = {
   access_token: '',
   refresh_token: ''
@@ -22,11 +25,21 @@ const mutations = {
 };
 
 const actions = {
-  changeAccessToken(context, access_token) {
+  async changeAccessToken(context, access_token) {
+    await db.remove({ type: 'access_token'});    
+    await db.insert({ type: 'access_token', access_token: access_token });
     context.commit('changeAccessToken', access_token);
   },
-  changeRefreshToken(context, refresh_token) {
+  async changeRefreshToken(context, refresh_token) {
+    db.remove({ type: 'refresh_token' });
+    db.insert({ type: 'refresh_token', refresh_token: refresh_token });
     context.commit('changeRefreshToken', refresh_token);
+  },
+  async refreshAccessToken(context) {
+    const access_token = await refreshToken(state.refresh_token);
+    await db.remove({ type: 'access_token' });
+    await db.insert({ type: 'access_token', access_token });
+    context.commit('changeAccessToken', access_token);
   }
 };
 
@@ -36,4 +49,4 @@ export default {
   getters,
   actions,
   mutations
-}
+};

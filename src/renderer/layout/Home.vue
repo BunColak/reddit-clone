@@ -9,7 +9,7 @@
 <script>
 import PostList from '@/components/PostList';
 import { mapState } from 'vuex';
-import { refreshToken, accessToken } from '@/utils/token';
+import { accessToken } from '@/utils/token';
 const { BrowserWindow } = require('electron').remote; // eslint-disable-line
 
 export default {
@@ -19,8 +19,7 @@ export default {
   },
   computed: {
     ...mapState({
-      access_token: state => state.user.access_token,
-      refresh_token: state => state.user.refresh_token
+      access_token: state => state.user.access_token
     })
   },
   data() {
@@ -49,15 +48,14 @@ export default {
           this.posts = request.data.data.children;
         })
         .catch(() => {
-          refreshToken(this.refresh_token).then(access_token => {
-            this.$store.dispatch('user/changeAccessToken', access_token);
-            this.$db.remove({ type: 'access_token' });
-            this.$db.insert({ type: 'access_token', access_token });
+          // This would mean access token expired, needs refreshing
+          this.$store.dispatch('user/refreshAccessToken').then(() => {
             this.getRedditFrontpage();
           });
         });
     },
     loginToReddit() {
+      // Create auth window
       let authWindow = new BrowserWindow({
         width: 1280,
         height: 720,
@@ -77,14 +75,14 @@ export default {
       authWindow.webContents.on('will-navigate', function(event, newUrl) {
         const url = new URL(newUrl);
 
+        // If user hasn't logged in at all it requires 2 redirects.
         if (url.hostname === 'localhost') {
           const code = url.searchParams.get('code');
+
           accessToken(code).then(function(codes) {
             vue.$store.dispatch('user/changeAccessToken', codes.access_token);
             vue.$store.dispatch('user/changeRefreshToken', codes.refresh_token);
 
-            vue.$db.insert({ type: 'access_token', access_token: codes.access_token });
-            vue.$db.insert({ type: 'refresh_token', refresh_token: codes.refresh_token });
             authWindow.destroy();
           });
         }

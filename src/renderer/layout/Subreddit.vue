@@ -38,6 +38,11 @@ export default {
         })
         .then(request => {
           this.posts = request.data.data.children;
+        })
+        .catch(() => {
+          this.$store.dispatch('user/refreshAccessToken').then(() => {
+            this.getPosts();
+          });
         });
     }
   }
