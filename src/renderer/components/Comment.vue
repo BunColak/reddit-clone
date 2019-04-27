@@ -1,6 +1,15 @@
 <template>
   <div class="comment">
-    <p class="author">{{ comment.data.author }}</p>
+    <div class="ups">
+      <i class="material-icons">
+        keyboard_arrow_up
+      </i>
+      <i class="material-icons">
+        keyboard_arrow_down
+      </i>
+      <div v-if="replies" class="collapse"></div>
+    </div>
+    <span class="author">{{ comment.data.author }}</span>
     <div v-html="commentBody"></div>
     <div class="replies" v-if="replies">
       <comment v-for="reply in replies" :key="reply.id" :comment="reply"></comment>
@@ -23,7 +32,7 @@ export default {
           reply.kind !== 'more' && replies.push(reply);
         });
       }
-      return replies;
+      return replies.length ? replies : '';
     },
     commentBody() {
       if (this.comment.data.body_html) {
@@ -37,12 +46,47 @@ export default {
 
 <style lang="scss">
 .comment {
-  padding: 8px 16px;
+  padding: 8px 16px 8px 48px;
   background: white;
-  margin: 4px 0;
-  border-left: inset 1px lighten($color: #000000, $amount: 60);
+  position: relative;
+
+  .ups {
+    position: absolute;
+    left: 16px;
+    top: 8px;
+    height: calc(100% - 32px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    i {
+      color: lighten($color: #000000, $amount: 60);
+
+      &:hover {
+        cursor: pointer;
+        color: lighten($color: #000000, $amount: 30);
+        font-weight: bold;
+      }
+    }
+
+    .collapse {
+      width: 1px;
+      background: lighten($color: #000000, $amount: 80);
+      height: 100%;
+
+      &:hover {
+        background: lighten($color: #000000, $amount: 30);
+        cursor: pointer;
+      }
+    }
+  }
+
+  p {
+    margin: 8px 0;
+  }
 
   .comments > & {
+    margin: 8px 0;
     border-left: none;
   }
 
