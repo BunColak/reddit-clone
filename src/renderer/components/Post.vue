@@ -9,9 +9,12 @@
         keyboard_arrow_down
       </i>
     </div>
-    <div class="info">
+    <div class="info" v-bind:class="{'with-thumbnail' : post.data.thumbnail_height}">
+      <a :href="post.data.url" target="_blank" class="thumbnail" v-if="post.data.thumbnail_height">
+        <img :src="post.data.thumbnail" alt="Thumbnail">
+      </a>
       <div class="title">
-        <router-link v-if="post.data.is_self" :to="postLink">
+        <router-link v-if="post.data.is_self" :to="postLink" v-bind:class="{sticky: post.data.stickied}">
           {{ post.data.title }}
         </router-link>
         <a :href="post.data.url" target="_blank" v-else
@@ -34,7 +37,7 @@
 
 
 <script>
-import { distanceInWordsToNow } from 'date-fns'
+import { distanceInWordsToNow } from 'date-fns';
 export default {
   name: 'post',
   props: {
@@ -51,7 +54,7 @@ export default {
       return `/post/${this.post.data.id}`;
     },
     relativePostTime() {
-      return distanceInWordsToNow(this.post.data.created*1000)
+      return distanceInWordsToNow(this.post.data.created * 1000);
     },
     subredditLink() {
       return `/subreddit/${this.post.data.subreddit}`;
@@ -92,6 +95,26 @@ li {
   }
 
   .info {
+    position: relative;
+
+    &.with-thumbnail {
+      padding-right: 105px;
+    }
+
+    .thumbnail {
+      position: absolute;
+      right: 0;
+      width: 100px;
+      height: 54px;
+      overflow: hidden;
+      margin: 0;
+      border-radius: 4px;
+
+      img {
+        width: 100%;
+      }
+    }
+
     .title {
       a {
         font-size: 18px;
@@ -101,6 +124,10 @@ li {
 
         &:hover {
           color: black;
+        }
+
+        &.sticky {
+          color: green;
         }
 
         .domain {

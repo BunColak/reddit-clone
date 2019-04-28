@@ -2,19 +2,23 @@
   <nav>
     <div class="container">
       <router-link exact to="/" active-class="active">Front Page</router-link>
+      <router-link v-if="subredditPage" active-class="active" :to="'/subreddit/'+subredditPage">{{subredditPage}}</router-link>
       <span v-if="access_token" class="logout" @click="logout">Logout</span>
     </div>
   </nav>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState } from 'vuex';
 export default {
   name: 'navigation',
   computed: {
     ...mapState({
       access_token: state => state.user.access_token
-    })
+    }),
+    subredditPage() {
+      return this.$route.params.subreddit;
+    }
   },
   methods: {
     logout() {
@@ -39,6 +43,11 @@ nav {
 
   a {
     color: white;
+    margin: 0 10px;
+
+    &:first-of-type {
+      margin-left: 0;
+    }
 
     &.active {
       font-weight: 600;

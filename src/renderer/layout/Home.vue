@@ -39,7 +39,7 @@ export default {
   methods: {
     getRedditFrontpage() {
       this.$http
-        .get('http://oauth.reddit.com/best.json?limit=50', {
+        .get('http://oauth.reddit.com/hot.json?limit=50', {
           headers: {
             authorization: this.access_token ? 'Bearer ' + this.access_token : ''
           }
